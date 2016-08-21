@@ -3,57 +3,70 @@ package service
 import (
 	"fmt"
 	"net/url"
+
+	"github.com/kataras/iris"
+)
+
+const (
+	hackerRankUrl = "https://hacker-news.firebaseio.com/v0"
+	hackerRankLimit = 10
 )
 
 type HackerRankItem struct {
-	Id        uint32 `json:"id,omitempty"`
 	Title     string `json:"title,omitempty"`
 	Url       string `json:"url,omitempty"`
 	Points    uint32 `json:"score,omitempty"`
-	CreatedAt uint32 `json:"time,omitempty"`
 }
 
-type HackerRank struct {
-	Url string
+type HackerRankAPI struct {
+	*iris.Context
 }
 
-func (h HackerRank) Get() (string, error) {
-	trending, err := url.Parse(h.Url + "/topstories.json")
+func (h HackerRankAPI) Get() {
+	trending, _ := url.Parse(hackerRankUrl + "/topstories.json")
+	request, err := newRequest("GET", trending)
 	if err != nil {
-		return "", err
+		h.JSON(iris.StatusInternalServerError, iris.Map{
+			"Error": "Could not make request",
+		})
+		return
 	}
 
-	request, err := NewRequest("GET", trending)
+	response, err := do(request)
 	if err != nil {
-		return "", err
-	}
-
-	response, err := Do(request)
-	if err != nil {
-		return "", err
+		h.JSON(iris.StatusInternalServerError, iris.Map{
+			"Error": "Could not do request",
+		})
+		return
 	}
 
 	result := new([]uint32)
-	Decode(response, result)
+	decode(response, result)
 
 	items := new([]HackerRankItem)
-	for _, id := range (*result)[:10] {
-		itemUrl, _ := url.Parse(fmt.Sprintf("%s/item/%v.json", h.Url, id))
-		request, err := NewRequest("GET", itemUrl)
+	for _, id := range (*result)[:hackerRankLimit] {
+		itemUrl, _ := url.Parse(fmt.Sprintf("%s/item/%v.json", hackerRankUrl, id))
+		request, err := newRequest("GET", itemUrl)
 		if err != nil {
-			return "", err
+			h.JSON(iris.StatusInternalServerError, iris.Map{
+				"Error": "Could not make request",
+			})
+			return
 		}
 
-		response, err := Do(request)
+		response, err := do(request)
 		if err != nil {
-			return "", err
+			h.JSON(iris.StatusInternalServerError, iris.Map{
+				"Error": "Could not do request",
+			})
+			return
 		}
 
 		item := new(HackerRankItem)
-		Decode(response, item)
+		decode(response, item)
 
 		*items = append(*items, *item)
 	}
 
-	return Encode(items)
+	h.JSON(iris.StatusOK, items)
 }

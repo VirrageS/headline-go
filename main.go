@@ -1,25 +1,17 @@
 package main
 
 import (
-	"fmt"
+	"github.com/iris-contrib/middleware/recovery"
+	"github.com/kataras/iris"
 
 	"github.com/VirrageS/headline-go/service"
 )
 
-const (
-	githubUrl = "https://api.github.com"
-	mediumUrl = "https://api.medium.com"
-	hackerRankUrl = "https://hacker-news.firebaseio.com/v0"
-)
-
 func main() {
-	var hackerRank service.Service = service.HackerRank{Url: hackerRankUrl}
-	items, err := hackerRank.Get()
-	fmt.Print(err)
-	fmt.Printf("%s\n", items)
+	iris.Use(recovery.New())
 
-	var github service.Service = service.Github{Url: githubUrl}
-	items, err = github.Get()
-	fmt.Print(err)
-	fmt.Printf("%s\n", items)
+	iris.API("/github", service.GithubAPI{})
+	iris.API("/hackerrank", service.HackerRankAPI{})
+	iris.API("/reddit", service.RedditAPI{})
+	iris.Listen(":8080")
 }
