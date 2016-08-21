@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 
-	"github.com/VirrageS/headline/service"
+	"github.com/VirrageS/headline-go/service"
 )
 
 const (
