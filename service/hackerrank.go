@@ -5,6 +5,8 @@ import (
 	"net/url"
 
 	"github.com/kataras/iris"
+
+	"github.com/VirrageS/cache"
 )
 
 const (
@@ -23,6 +25,13 @@ type HackerRankAPI struct {
 }
 
 func (h HackerRankAPI) Get() {
+	c := h.Context.Get("cache").(*cache.Cache)
+	cached_items, ok := c.Get("hackerrank")
+	if ok {
+		h.JSON(iris.StatusOK, cached_items)
+		return
+	}
+
 	trending, _ := url.Parse(hackerRankUrl + "/topstories.json")
 	request, err := newRequest("GET", trending)
 	if err != nil {
@@ -43,7 +52,7 @@ func (h HackerRankAPI) Get() {
 	result := new([]uint32)
 	decode(response, result)
 
-	items := new([]HackerRankItem)
+	items := make([]HackerRankItem, 0)
 	for _, id := range (*result)[:hackerRankLimit] {
 		itemUrl, _ := url.Parse(fmt.Sprintf("%s/item/%v.json", hackerRankUrl, id))
 		request, err := newRequest("GET", itemUrl)
@@ -65,8 +74,9 @@ func (h HackerRankAPI) Get() {
 		item := new(HackerRankItem)
 		decode(response, item)
 
-		*items = append(*items, *item)
+		items = append(items, *item)
 	}
 
-	h.JSON(iris.StatusOK, items)
+	c.Set("hackerrank", &items)
+	h.JSON(iris.StatusOK, &items)
 }

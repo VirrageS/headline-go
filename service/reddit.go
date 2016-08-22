@@ -1,40 +1,49 @@
 package service
 
 import (
-    "net/url"
+	"net/url"
 
-    "github.com/kataras/iris"
+	"github.com/kataras/iris"
+
+	"github.com/VirrageS/cache"
 )
 
 const (
-    redditUrl = "https://www.reddit.com/r/programming"
+	redditUrl = "https://www.reddit.com/r/programming"
 )
 
 type RedditItem struct{
-    Title  string `json:"title,omitempty"`
-    Url    string `json:"url,omitempty"`
-    Points int `json:"score,omitempty"`
+	Title  string `json:"title,omitempty"`
+	Url	string `json:"url,omitempty"`
+	Points int `json:"score,omitempty"`
 }
 
 type RedditResultChildren struct {
-    Kind string `json:"kind,omitempty"`
-    Item RedditItem `json:"data,omitempty"`
+	Kind string `json:"kind,omitempty"`
+	Item RedditItem `json:"data,omitempty"`
 }
 
 type RedditResult struct {
-    Kind string `json:"kind,omitempty"`
-    Data struct {
-        Modhash string `json:"modhash,omitempty"`
-        Children []RedditResultChildren `json:"children,omitempty"`
-    } `json:"data,omitempty"`
+	Kind string `json:"kind,omitempty"`
+	Data struct {
+		Modhash string `json:"modhash,omitempty"`
+		Children []RedditResultChildren `json:"children,omitempty"`
+	} `json:"data,omitempty"`
 }
 
 type RedditAPI struct {
-    *iris.Context
+	*iris.Context
 }
 
 func (r RedditAPI) Get() {
-    trending, _ := url.Parse(redditUrl + "/hot.json")
+	c := r.Context.Get("cache").(*cache.Cache)
+	cached_items, ok := c.Get("reddit")
+	if ok {
+		r.JSON(iris.StatusOK, cached_items)
+		return
+	}
+
+	trending, _ := url.Parse(redditUrl + "/hot.json")
 	request, err := newRequest("GET", trending)
 	if err != nil {
 		r.JSON(iris.StatusInternalServerError, iris.Map{
@@ -54,10 +63,14 @@ func (r RedditAPI) Get() {
 	result := new(RedditResult)
 	decode(response, result)
 
-    items := new([]RedditItem)
-    for _, c := range result.Data.Children {
-        *items = append(*items, c.Item)
-    }
+	items := make([]RedditItem, 0)
+	for _, c := range result.Data.Children {
+		items = append(items, c.Item)
+	}
 
-    r.JSON(iris.StatusOK, items)
+	if len(items) > 0 {
+		c.Set("reddit", &items)
+	}
+
+	r.JSON(iris.StatusOK, &items)
 }

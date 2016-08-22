@@ -9,6 +9,7 @@ import (
 
 	"github.com/kataras/iris"
 
+	"github.com/VirrageS/cache"
 	"github.com/VirrageS/scrape"
 )
 
@@ -28,6 +29,13 @@ type GithubAPI struct {
 }
 
 func (g GithubAPI) Get() {
+	c := g.Context.Get("cache").(*cache.Cache)
+	cached_items, ok := c.Get("github")
+	if ok {
+		g.JSON(iris.StatusOK, cached_items)
+		return
+	}
+
 	response, err := http.Get(githubUrl)
 
 	if err != nil {
@@ -47,7 +55,7 @@ func (g GithubAPI) Get() {
 
 	repos := scrape.Find(root, ".repo-list-item")
 
-	repositories := new([]Repository)
+	repositories := make([]Repository, 0)
 	for _, repo := range repos {
 		// get url
 		link := scrape.Find(repo, ".repo-list-name a")[0]
@@ -70,8 +78,9 @@ func (g GithubAPI) Get() {
 		numbers := re.FindAllString(scrape.Text(meta), -1)
 		stars, _ := strconv.Atoi(numbers[0])
 
-		*repositories = append(*repositories, Repository{Title: name, Description: description, Url: url, Points: stars})
+		repositories = append(repositories, Repository{Title: name, Description: description, Url: url, Points: stars})
 	}
 
-	g.JSON(iris.StatusOK, repositories)
+	c.Set("github", &repositories)
+	g.JSON(iris.StatusOK, &repositories)
 }
