@@ -3,6 +3,7 @@ package service
 import (
 	"fmt"
 	"net/url"
+	"strconv"
 
 	"github.com/kataras/iris"
 
@@ -11,13 +12,22 @@ import (
 
 const (
 	hackerRankUrl = "https://hacker-news.firebaseio.com/v0"
-	hackerRankLimit = 10
+	maxItemsLimit = 10
 )
 
 type HackerRankItem struct {
 	Title     string `json:"title,omitempty"`
 	Url       string `json:"url,omitempty"`
-	Points    uint32 `json:"score,omitempty"`
+	Points    int `json:"score,omitempty"`
+}
+
+func (h *HackerRankItem) toHeadlineItem() *HeadlineItem {
+	return &HeadlineItem{
+		Title: h.Title,
+		Description: "",
+		Url: h.Url,
+		Points: strconv.Itoa(h.Points),
+	}
 }
 
 type HackerRankAPI struct {
@@ -53,7 +63,7 @@ func (h HackerRankAPI) Get() {
 	decode(response, result)
 
 	items := make([]HackerRankItem, 0)
-	for _, id := range (*result)[:hackerRankLimit] {
+	for _, id := range (*result)[:maxItemsLimit] {
 		itemUrl, _ := url.Parse(fmt.Sprintf("%s/item/%v.json", hackerRankUrl, id))
 		request, err := newRequest("GET", itemUrl)
 		if err != nil {
@@ -77,6 +87,11 @@ func (h HackerRankAPI) Get() {
 		items = append(items, *item)
 	}
 
-	c.Set("hackerrank", &items)
-	h.JSON(iris.StatusOK, &items)
+	headline := make([]HeadlineItem, 0)
+	for _, item := range items {
+		headline = append(headline, *item.toHeadlineItem())
+	}
+
+	c.Set("hackerrank", &headline)
+	h.JSON(iris.StatusOK, &headline)
 }
