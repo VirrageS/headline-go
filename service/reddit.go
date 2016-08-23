@@ -2,6 +2,7 @@ package service
 
 import (
 	"net/url"
+	"strconv"
 
 	"github.com/kataras/iris"
 
@@ -16,6 +17,15 @@ type RedditItem struct{
 	Title  string `json:"title,omitempty"`
 	Url	string `json:"url,omitempty"`
 	Points int `json:"score,omitempty"`
+}
+
+func (r *RedditItem) toHeadlineItem() *HeadlineItem {
+	return &HeadlineItem{
+		Title: r.Title,
+		Description: "",
+		Url: r.Url,
+		Points: strconv.Itoa(r.Points),
+	}
 }
 
 type RedditResultChildren struct {
@@ -63,14 +73,15 @@ func (r RedditAPI) Get() {
 	result := new(RedditResult)
 	decode(response, result)
 
-	items := make([]RedditItem, 0)
+
+	headline := make([]HeadlineItem, 0)
 	for _, c := range result.Data.Children {
-		items = append(items, c.Item)
+		headline = append(headline, *c.Item.toHeadlineItem())
 	}
 
-	if len(items) > 0 {
-		c.Set("reddit", &items)
+	if len(headline) > 0 {
+		c.Set("reddit", &headline)
 	}
 
-	r.JSON(iris.StatusOK, &items)
+	r.JSON(iris.StatusOK, &headline)
 }

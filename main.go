@@ -3,7 +3,7 @@ package main
 import (
 	"time"
 
-	// "github.com/iris-contrib/middleware/recovery"
+	"github.com/iris-contrib/middleware/cors"
 	"github.com/kataras/iris"
 
 	"github.com/VirrageS/cache"
@@ -11,7 +11,12 @@ import (
 )
 
 func main() {
-	// iris.Use(recovery.New())
+	// this should not be in production...
+	crs := cors.New(cors.Options{
+		AllowedOrigins: []string{"*"},
+		AllowedHeaders: []string{"*"},
+	})
+	iris.Use(crs)
 
 	cache := cache.NewCache(time.Minute * 2)
 	iris.UseFunc(func(c *iris.Context) {

@@ -3,7 +3,6 @@ package service
 import (
 	"net/http"
 	"regexp"
-	"strconv"
 
 	"golang.org/x/net/html"
 
@@ -18,10 +17,19 @@ const (
 )
 
 type Repository struct {
-	Title	   string `json:"title,omitempty"`
+	Title	   	string `json:"title,omitempty"`
 	Description string `json:"description,omitempty"`
-	Url		 string `json:"url,omitempty"`
-	Points	  int `json:"points,omitempty"`
+	Url			string `json:"url,omitempty"`
+	Points		string `json:"points,omitempty"`
+}
+
+func (r *Repository) toHeadlineItem() *HeadlineItem {
+	return &HeadlineItem{
+		Title: r.Title,
+		Description: r.Description,
+		Url: r.Url,
+		Points: r.Points,
+	}
 }
 
 type GithubAPI struct {
@@ -74,13 +82,17 @@ func (g GithubAPI) Get() {
 		// get stars
 		meta := scrape.Find(repo, ".repo-list-meta")[0]
 
-		re := regexp.MustCompile("[0-9]+")
-		numbers := re.FindAllString(scrape.Text(meta), -1)
-		stars, _ := strconv.Atoi(numbers[0])
+		re := regexp.MustCompile("[0-9,]+")
+		stars := re.FindAllString(scrape.Text(meta), -1)[0]
 
 		repositories = append(repositories, Repository{Title: name, Description: description, Url: url, Points: stars})
 	}
 
-	c.Set("github", &repositories)
-	g.JSON(iris.StatusOK, &repositories)
+	headline := make([]HeadlineItem, 0)
+	for _, repository := range repositories {
+		headline = append(headline, *repository.toHeadlineItem())
+	}
+
+	c.Set("github", &headline)
+	g.JSON(iris.StatusOK, &headline)
 }
