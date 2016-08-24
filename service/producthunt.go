@@ -3,6 +3,7 @@ package service
 import (
 	"net/http"
 	"regexp"
+    "sort"
 	"strconv"
 	"strings"
 
@@ -71,6 +72,7 @@ func (p ProductHuntAPI) Get() {
 		headline = append(headline, HeadlineItem{Title: name, Description: description, Url: url, Points: points})
 	}
 
+    sort.Sort(ByPoints(headline))
 	c.Set("producthunt", &headline)
 	p.JSON(iris.StatusOK, &headline)
 }

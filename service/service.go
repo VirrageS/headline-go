@@ -17,6 +17,13 @@ type HeadlineItem struct {
 	Points		int `json:"points,omitempty"`
 }
 
+type ByPoints []HeadlineItem
+
+func (p ByPoints) Len() int           { return len(p) }
+func (p ByPoints) Swap(i, j int)      { p[i], p[j] = p[j], p[i] }
+func (p ByPoints) Less(i, j int) bool { return p[i].Points > p[j].Points }
+
+
 func newRequest(method string, url *url.URL) (*http.Request, error) {
 	req, err := http.NewRequest(method, url.String(), nil)
 	if err != nil {

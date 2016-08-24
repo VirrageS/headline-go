@@ -3,6 +3,7 @@ package service
 import (
 	"fmt"
 	"net/url"
+	"sort"
 
 	"github.com/kataras/iris"
 
@@ -90,6 +91,7 @@ func (h HackerNewsAPI) Get() {
 		headline = append(headline, *item.toHeadlineItem())
 	}
 
+	sort.Sort(ByPoints(headline))
 	c.Set("hackernews", &headline)
 	h.JSON(iris.StatusOK, &headline)
 }

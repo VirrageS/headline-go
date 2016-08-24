@@ -3,6 +3,7 @@ package service
 import (
 	"net/http"
 	"regexp"
+	"sort"
 	"strconv"
 	"strings"
 
@@ -75,6 +76,7 @@ func (g GithubAPI) Get() {
 		headline = append(headline, HeadlineItem{Title: name, Description: description, Url: url, Points: stars})
 	}
 
+	sort.Sort(ByPoints(headline))
 	c.Set("github", &headline)
 	g.JSON(iris.StatusOK, &headline)
 }
