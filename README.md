@@ -14,4 +14,4 @@ After that you should get this repository to path
     $ go install
     $ headline-go
 
-after that visit `localhost:8080/github` and you should get all trending repositories.
+after that visit http://localhost:8080/github and you should get all trending repositories.
