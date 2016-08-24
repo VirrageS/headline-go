@@ -11,17 +11,17 @@ import (
 )
 
 const (
-	hackerRankUrl = "https://hacker-news.firebaseio.com/v0"
+	hackerNewsUrl = "https://hacker-news.firebaseio.com/v0"
 	maxItemsLimit = 10
 )
 
-type HackerRankItem struct {
+type HackerNewsItem struct {
 	Title     string `json:"title,omitempty"`
 	Url       string `json:"url,omitempty"`
 	Points    int `json:"score,omitempty"`
 }
 
-func (h *HackerRankItem) toHeadlineItem() *HeadlineItem {
+func (h *HackerNewsItem) toHeadlineItem() *HeadlineItem {
 	return &HeadlineItem{
 		Title: h.Title,
 		Description: "",
@@ -30,19 +30,19 @@ func (h *HackerRankItem) toHeadlineItem() *HeadlineItem {
 	}
 }
 
-type HackerRankAPI struct {
+type HackerNewsAPI struct {
 	*iris.Context
 }
 
-func (h HackerRankAPI) Get() {
+func (h HackerNewsAPI) Get() {
 	c := h.Context.Get("cache").(*cache.Cache)
-	cached_items, ok := c.Get("hackerrank")
+	cached_items, ok := c.Get("hackernews")
 	if ok {
 		h.JSON(iris.StatusOK, cached_items)
 		return
 	}
 
-	trending, _ := url.Parse(hackerRankUrl + "/topstories.json")
+	trending, _ := url.Parse(hackerNewsUrl + "/topstories.json")
 	request, err := newRequest("GET", trending)
 	if err != nil {
 		h.JSON(iris.StatusInternalServerError, iris.Map{
@@ -62,9 +62,9 @@ func (h HackerRankAPI) Get() {
 	result := new([]uint32)
 	decode(response, result)
 
-	items := make([]HackerRankItem, 0)
+	items := make([]HackerNewsItem, 0)
 	for _, id := range (*result)[:maxItemsLimit] {
-		itemUrl, _ := url.Parse(fmt.Sprintf("%s/item/%v.json", hackerRankUrl, id))
+		itemUrl, _ := url.Parse(fmt.Sprintf("%s/item/%v.json", hackerNewsUrl, id))
 		request, err := newRequest("GET", itemUrl)
 		if err != nil {
 			h.JSON(iris.StatusInternalServerError, iris.Map{
@@ -81,7 +81,7 @@ func (h HackerRankAPI) Get() {
 			return
 		}
 
-		item := new(HackerRankItem)
+		item := new(HackerNewsItem)
 		decode(response, item)
 
 		items = append(items, *item)
@@ -92,6 +92,6 @@ func (h HackerRankAPI) Get() {
 		headline = append(headline, *item.toHeadlineItem())
 	}
 
-	c.Set("hackerrank", &headline)
+	c.Set("hackernews", &headline)
 	h.JSON(iris.StatusOK, &headline)
 }

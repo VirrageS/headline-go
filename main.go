@@ -25,7 +25,7 @@ func main() {
 	})
 
 	iris.API("/github", service.GithubAPI{})
-	iris.API("/hackerrank", service.HackerRankAPI{})
+	iris.API("/hackernews", service.HackerNewsAPI{})
 	iris.API("/reddit", service.RedditAPI{})
 	iris.Listen(":8080")
 }
