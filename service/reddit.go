@@ -2,7 +2,6 @@ package service
 
 import (
 	"net/url"
-	"strconv"
 
 	"github.com/kataras/iris"
 
@@ -24,7 +23,7 @@ func (r *RedditItem) toHeadlineItem() *HeadlineItem {
 		Title: r.Title,
 		Description: "",
 		Url: r.Url,
-		Points: strconv.Itoa(r.Points),
+		Points: r.Points,
 	}
 }
 

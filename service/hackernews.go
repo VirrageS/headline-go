@@ -3,7 +3,6 @@ package service
 import (
 	"fmt"
 	"net/url"
-	"strconv"
 
 	"github.com/kataras/iris"
 
@@ -25,7 +24,7 @@ func (h *HackerNewsItem) toHeadlineItem() *HeadlineItem {
 		Title: h.Title,
 		Description: "",
 		Url: h.Url,
-		Points: strconv.Itoa(h.Points),
+		Points: h.Points,
 	}
 }
 

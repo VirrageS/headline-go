@@ -14,7 +14,7 @@ type HeadlineItem struct {
 	Title		string `json:"title,omitempty"`
 	Description	string `json:"description,omitempty"`
 	Url 		string `json:"url,omitempty"`
-	Points		string `json:"points,omitempty"`
+	Points		int `json:"points,omitempty"`
 }
 
 func newRequest(method string, url *url.URL) (*http.Request, error) {
