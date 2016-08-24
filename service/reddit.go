@@ -75,7 +75,13 @@ func (r RedditAPI) Get() {
 
 
 	headline := make([]HeadlineItem, 0)
-	for _, c := range result.Data.Children {
+
+	limit := len(result.Data.Children)
+	if limit > maxItemsLimit {
+		limit = maxItemsLimit
+	}
+
+	for _, c := range result.Data.Children[:limit] {
 		headline = append(headline, *c.Item.toHeadlineItem())
 	}
 

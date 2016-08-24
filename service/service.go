@@ -6,6 +6,10 @@ import (
 	"net/url"
 )
 
+const (
+	maxItemsLimit = 10
+)
+
 type HeadlineItem struct {
 	Title		string `json:"title,omitempty"`
 	Description	string `json:"description,omitempty"`

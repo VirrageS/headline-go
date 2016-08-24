@@ -12,7 +12,6 @@ import (
 
 const (
 	hackerNewsUrl = "https://hacker-news.firebaseio.com/v0"
-	maxItemsLimit = 10
 )
 
 type HackerNewsItem struct {

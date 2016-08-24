@@ -64,7 +64,7 @@ func (g GithubAPI) Get() {
 	repos := scrape.Find(root, ".repo-list-item")
 
 	repositories := make([]Repository, 0)
-	for _, repo := range repos {
+	for _, repo := range repos[:maxItemsLimit] {
 		// get url
 		link := scrape.Find(repo, ".repo-list-name a")[0]
 		url := "https://github.com" + scrape.Attr(link, "href")
