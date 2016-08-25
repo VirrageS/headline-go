@@ -3,7 +3,7 @@ package service
 import (
 	"net/http"
 	"regexp"
-    "sort"
+	"sort"
 	"strconv"
 	"strings"
 
@@ -50,7 +50,13 @@ func (p ProductHuntAPI) Get() {
 
 	headline := make([]HeadlineItem, 0)
 	products := scrape.Find(scrape.Find(root, "ul")[0], "li")
-	for _, product := range products[:maxItemsLimit] {
+
+	limit := len(products)
+	if limit > maxItemsLimit {
+		limit = maxItemsLimit
+	}
+
+	for _, product := range products[:limit] {
 		// get url
 		link := scrape.Find(product, "div a")[0]
 		url := "https://producthunt.com" + scrape.Attr(link, "href")
@@ -72,7 +78,9 @@ func (p ProductHuntAPI) Get() {
 		headline = append(headline, HeadlineItem{Title: name, Description: description, Url: url, Points: points})
 	}
 
-    sort.Sort(ByPoints(headline))
-	c.Set("producthunt", &headline)
+	sort.Sort(ByPoints(headline))
+	if len(headline) > 0 {
+		c.Set("producthunt", &headline)
+	}
 	p.JSON(iris.StatusOK, &headline)
 }

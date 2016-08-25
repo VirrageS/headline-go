@@ -73,20 +73,17 @@ func (r RedditAPI) Get() {
 	result := new(RedditResult)
 	decode(response, result)
 
-
-	headline := make([]HeadlineItem, 0)
-
 	limit := len(result.Data.Children)
 	if limit > maxItemsLimit {
 		limit = maxItemsLimit
 	}
 
+	headline := make([]HeadlineItem, 0)
 	for _, c := range result.Data.Children[:limit] {
 		headline = append(headline, *c.Item.toHeadlineItem())
 	}
 
 	sort.Sort(ByPoints(headline))
-
 	if len(headline) > 0 {
 		c.Set("reddit", &headline)
 	}
