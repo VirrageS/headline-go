@@ -7,9 +7,11 @@ I assume that you have installed Golang. If not visit: https://golang.org/doc/co
 
 
 After that you should get this repository to path
-`$GOPATH/src/github.com/VirrageS/headline-go`, then install all dependencies and make executable file:
+`$GOPATH/src/github.com/VirrageS/headline-go`,
+then install all dependencies and make executable file:
 
-    $ cd $GOPATH/src/github.com/VirrageS/headline-go
+    $ git clone https://github.com/VirrageS/headline-go
+    $ cd headline-go
     $ go get
     $ go install
     $ headline-go

@@ -1,6 +1,7 @@
 package service
 
 import (
+	"fmt"
 	"net/url"
 	"sort"
 
@@ -53,7 +54,8 @@ func (r RedditAPI) Get() {
 		return
 	}
 
-	trending, _ := url.Parse(redditUrl + "/hot.json")
+	fullUrl := fmt.Sprintf("%s/hot.json?limit=%d", redditUrl, maxItemsLimit)
+	trending, _ := url.Parse(fullUrl)
 	request, err := newRequest("GET", trending)
 	if err != nil {
 		r.JSON(iris.StatusInternalServerError, iris.Map{
@@ -73,13 +75,8 @@ func (r RedditAPI) Get() {
 	result := new(RedditResult)
 	decode(response, result)
 
-	limit := len(result.Data.Children)
-	if limit > maxItemsLimit {
-		limit = maxItemsLimit
-	}
-
 	headline := make([]HeadlineItem, 0)
-	for _, c := range result.Data.Children[:limit] {
+	for _, c := range result.Data.Children {
 		headline = append(headline, *c.Item.toHeadlineItem())
 	}
 
