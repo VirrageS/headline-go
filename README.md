@@ -1,7 +1,7 @@
 # headline-go
 Backend for website to display trending links
 
-## Usage
+## Getting started
 
 I assume that you have installed Golang. If not visit: https://golang.org/doc/code.html
 

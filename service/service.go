@@ -31,6 +31,7 @@ func newRequest(method string, url *url.URL) (*http.Request, error) {
 	}
 
 	req.Header.Set("Accept", "application/json")
+	req.Header.Set("User-Agent", "Headline/1.0")
 	return req, nil
 }
 
