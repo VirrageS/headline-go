@@ -51,12 +51,7 @@ func (p ProductHuntAPI) Get() {
 	headline := make([]HeadlineItem, 0)
 	products := scrape.Find(scrape.Find(root, "ul")[0], "li")
 
-	limit := len(products)
-	if limit > maxItemsLimit {
-		limit = maxItemsLimit
-	}
-
-	for _, product := range products[:limit] {
+	for _, product := range products {
 		// get url
 		link := scrape.Find(product, "div a")[0]
 		url := "https://producthunt.com" + scrape.Attr(link, "href")
@@ -64,6 +59,11 @@ func (p ProductHuntAPI) Get() {
 		// get name
 		info := scrape.Find(link, "div span")
 		name := scrape.Text(info[0])
+
+		// skip products with empty name
+		if name == "" {
+			continue
+		}
 
 		// get description
 		description := scrape.Text(info[1])
@@ -76,6 +76,10 @@ func (p ProductHuntAPI) Get() {
 		points, _ := strconv.Atoi(strings.Replace(number, ",", "", -1))
 
 		headline = append(headline, HeadlineItem{Title: name, Description: description, Url: url, Points: points})
+
+		if len(headline) >= maxItemsLimit {
+			break
+		}
 	}
 
 	sort.Sort(ByPoints(headline))
