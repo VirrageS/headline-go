@@ -11,10 +11,10 @@ const (
 )
 
 type HeadlineItem struct {
-	Title		string `json:"title,omitempty"`
-	Description	string `json:"description,omitempty"`
-	Url 		string `json:"url,omitempty"`
-	Points		int `json:"points,omitempty"`
+	Title		string `json:"title"`
+	Description	string `json:"description"`
+	Url 		string `json:"url"`
+	Points		int `json:"points"`
 }
 
 type ByPoints []HeadlineItem
