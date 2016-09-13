@@ -5,4 +5,4 @@ WORKDIR /headline
 
 RUN go get && go install && headline-go
 
-EXPOSE 8080:80
+EXPOSE 8080
