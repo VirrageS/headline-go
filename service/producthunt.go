@@ -53,7 +53,17 @@ func (p ProductHuntAPI) Get() {
 
 	for _, product := range products {
 		// get url
-		link := scrape.Find(product, "div a")[0]
+		links := scrape.Find(product, "div a")
+
+		// Find link (url) with proper class
+		link := links[0]
+		for _, currentLink := range links {
+			if strings.Contains(scrape.Attr(currentLink, "class"), "link") {
+				link = currentLink
+				break
+			}
+		}
+
 		url := "https://producthunt.com" + scrape.Attr(link, "href")
 
 		// get name

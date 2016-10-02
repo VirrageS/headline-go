@@ -62,7 +62,7 @@ func (h HackerNewsAPI) Get() {
 	decode(response, result)
 
 	items := make([]HackerNewsItem, 0)
-	for _, id := range (*result)[:maxItemsLimit] {
+	for _, id := range *result {
 		itemUrl, _ := url.Parse(fmt.Sprintf("%s/item/%v.json", hackerNewsUrl, id))
 		request, err := newRequest("GET", itemUrl)
 		if err != nil {
@@ -83,7 +83,16 @@ func (h HackerNewsAPI) Get() {
 		item := new(HackerNewsItem)
 		decode(response, item)
 
+		// Omit items with no provided url
+		if item.Url == "" {
+			continue
+		}
+
 		items = append(items, *item)
+
+		if len(items) >= maxItemsLimit {
+			break
+		}
 	}
 
 	headline := make([]HeadlineItem, 0)
